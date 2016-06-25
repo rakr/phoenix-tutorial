@@ -1,0 +1,246 @@
+= Document Title
+:source-highlighter: pygments
+:pygments-style: colorful
+
+== Testing
+
+Elixir comes with a testing framework called **ExUnit**.
+
+Crack open your favorite editor, and enter the following code:
+
+[[first_test.exs]]
+[source, elixir]
+.first_test.exs
+----
+ExUnit.start
+
+defmodule FirstTest do
+  use ExUnit.Case
+
+  test "the truth" do
+    assert 1 + 1 == 2
+  end
+end
+----
+
+Now get back to the command line and run the file using `elixir`.
+
+[source, bash]
+----
+$ elixir first_test.exs
+----
+
+You should then see the following output:
+
+----
+.
+
+Finished in 0.04 seconds (0.04s on load, 0.00s on tests)
+1 test, 0 failures
+
+Randomized with seed 398238
+----
+
+Congratulations, you have created your first elixir script and you have
+executed it. This is a very good start.
+
+Let's start the dissection of what we have done so far.
+
+First the file extension `.exs` tells elixir that this is a script, and that it
+shouldn't be compiled. `.ex` on the contrary are supposed to be compiled. As a
+rule of thumb any file that does not participate in your application's
+execution should be an `.exs` file, for example: tests.
+
+The first line of the file instructs elixir to start `ExUnit`.
+
+[source, elixir]
+----
+ExUnit.start
+----
+
+In Elixir a **named function** cannot exist outside of a **module**, the
+`FirstTest` module is defined using the `defmodule` keyword.
+The next line sets up an ExUnit test case. The module `ExUnit.Case` configures
+and prepares the module for testing.
+
+
+[source, elixir]
+----
+defmodule FirstTest do
+  use ExUnit.Case
+
+  ...
+end
+----
+
+Next we define a named function, the keyword `test` is an elixir macro that is
+equivalent to `def`. The content of this function is an assertion, you'll see
+and use them often in test cases.
+
+[source, elixir]
+----
+defmodule FirstTest do
+  use ExUnit.Case
+
+  test "the truth" do
+    assert 1 + 1 == 2
+  end
+end
+----
+
+== Pattern Matching
+
+Elixir is a functional language, as such it does not implement the same
+patterns an Objected Oriented Language does. One of the biggest difference
+with, let's say Ruby is the `=` operator.
+
+In Ruby, this operator acts as an _assignment_. When we write
+
+----
+a_variable = 2
+----
+
+we assign the value two to the variable `a_variable`
+
+In Elixir this is quite different and understanding this pattern is key. As
+everything here we are going to test drive a _fibonnaci calculator_ and you
+will see _pattern matching_ in action.
+
+Crack open your terminal and enter the following command line:
+
+----
+$ mix new fib
+----
+
+`Mix` is a command line utility that manages Elixir projects. You get this
+command when you install Elixir, alongside with `elixir`, `iex`, ...
+
+The `new` option creates a new project, following a defined structure. 
+
+// TODO: Explain the structure created by Mix
+
+----
+* creating README.md
+* creating .gitignore
+* creating mix.exs
+* creating config
+* creating config/config.exs
+* creating lib
+* creating lib/fib.ex
+* creating test
+* creating test/test_helper.exs
+* creating test/fib_test.exs
+
+Your Mix project was created successfully.
+You can use "mix" to compile it, test it, and more:
+
+    cd fib
+    mix test
+
+Run "mix help" for more commands.
+----
+
+
+[source, elixir]
+----
+defmodule FibTest do
+  use ExUnit.Case
+  doctest Fib
+
+  test "fib(0) = 1" do
+    assert Fib.of(0) == 1
+  end
+end
+----
+
+----
+Finished in 0.03 seconds
+1 test, 1 failure
+----
+
+[source, elixir]
+----
+defmodule Fib do
+  def of(0) do
+    1
+  end
+end
+----
+
+[source, elixir]
+----
+  def of(1) do
+    1
+  end
+----
+
+----
+1 test, 0 failures
+----
+
+----
+.
+
+  1) test fib(1) = 1 (FibTest)
+     test/fib_test.exs:15
+     ** (FunctionClauseError) no function clause matching in Fib.of/1
+     stacktrace:
+       (fib) test/fib_test.exs:2: Fib.of(1)
+       test/fib_test.exs:16: (test)
+
+
+
+Finished in 0.06 seconds
+2 tests, 1 failure
+----
+
+----
+def of(1) do
+  1
+end
+----
+
+----
+test "fib(2) = 2" do
+  assert Fib.of(2) == 2
+end
+----
+
+----
+..
+
+  1) test fib(2) = 2 (FibTest)
+     test/fib_test.exs:13
+     ** (FunctionClauseError) no function clause matching in Fib.of/1
+     stacktrace:
+       (fib) lib/fib.ex:2: Fib.of(2)
+       test/fib_test.exs:14: (test)
+----
+
+----
+def of(x) do
+  of(x-1) + of(x-2)
+end
+----
+
+----
+...
+
+Finished in 0.03 seconds
+3 tests, 0 failures
+----
+
+----
+test "fib(11) = 144" do
+  assert Fib.of(11) == 144
+end
+----
+
+----
+....
+
+Finished in 0.04 seconds
+4 tests, 0 failures
+----
+
+// vim: set syntax=asciidoc tw=79:
