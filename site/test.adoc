@@ -1,8 +1,10 @@
-= Document Title
+= Phoenix Framework Tutorial
 :source-highlighter: pygments
 :pygments-style: colorful
 
 == Testing
+
+_Where we also learn about_ _**pattern matching**_
 
 Elixir comes with a testing framework called **ExUnit**.
 
@@ -140,6 +142,27 @@ You can use "mix" to compile it, test it, and more:
 Run "mix help" for more commands.
 ----
 
+The structure created by `mix` is the following
+
+* `config`: contains everything related to the configuration of your
+  application
+* `lib`: contains the actual code for your application
+* `test`: contains the tests
+* `mix.exs`: contains the dependencies your application relies on. We
+  will dive into the content of this file later.
+
+For the time being, we are going to focus essentially on `lib` and `test`.
+
+Let's write our first test, as a reminder a _Fibonacci suite_ looks like:
+
+1, 1, 2, 3, 5, 8, 13, 21, 34, 65
+
+Each number is the sum of the two previous ones. If there are not enough
+numbers before, than the value defaults to 1. The algorithm is straightfoward
+but we are going to test drive this. One tiny step at a time...
+
+We are going to write the _code we'd like to have_, and start with the first
+test case: _fib(0) = 1_. Open `fib_test.exs`, and replace the first test with:
 
 [source, elixir]
 ----
@@ -153,69 +176,172 @@ defmodule FibTest do
 end
 ----
 
+Now on the command line enter:
+
 ----
-Finished in 0.03 seconds
-1 test, 1 failure
+$ mix test
 ----
+
+`Mix` starts your tiny test suite and makes the first assertion, of course it
+fails.
+
+----
+Compiling 1 file (.ex)
+Generated fib app
+** (CompileError) test/fib_test.exs:3: module Fib is not loaded and could not be found
+    (ex_unit) expanding macro: ExUnit.DocTest.doctest/1
+    test/fib_test.exs:3: FibTest (module)
+    (elixir) lib/code.ex:363: Code.require_file/2
+    (elixir) lib/kernel/parallel_require.ex:56: anonymous fn/2 in Kernel.ParallelRequire.spawn_requires/5
+----
+
+The reason why it fails, and the compiler complains as the module `Fib` cannot
+be found. Create a file named `lib/fib.ex` and enter the following code to
+create the module `Fib`.
 
 [source, elixir]
 ----
 defmodule Fib do
-  def of(0) do
-    1
-  end
+end
+----
+ 
+Test again, this time the compiler complains for another reason, it can't find
+the function `Fib.of/1`. The `/1` means *arity 1*, said otherwise a function
+that accepts one argument. In other programming language you would probably
+create a function or a method this way:
+
+----
+def of(x) do
 end
 ----
 
-[source, elixir]
+And you would put all the logic in this method. You could do that also in
+Elixir, but that would be forgetting about one key feature Elixir has: *pattern
+matching*.
+
+In most languages, the operator `=` means assign the value on the right to the
+variable on the left. In Elixir it's quite different. Let's see that in action:
+
+Crack open `iex` and type the following instructions:
+
 ----
-  def of(1) do
-    1
-  end
+$ iex
+Erlang/OTP 18 [erts-7.3] [source] [64-bit] [smp:8:8] [async-threads:10] [hipe] [kernel-poll:false] [dtrace]
+
+Interactive Elixir (1.3.0) - press Ctrl+C to exit (type h() ENTER for help)
+iex(1)> a = 1
+1
+iex(2)> 1 = a
+1
+iex(3)> a = 2
+2
+iex(4)> 1 = a
+** (MatchError) no match of right hand side value: 2
+
+iex(4)>
 ----
+
+We start by "assigning" the value `1` to the variable `a` but then we do
+something weird, we try to "assign" `a` to `1`: you would never do that in
+another language. And that's exactly the point I wanted to make the `=`
+operator is *not* and assignment operator, it's a pattern matching one.
+
+The code written line 2 actually reads like this: *are 1 and similar?*. `a`
+being initialised with the value `1` the answer is yes.
+
+Line 3 we are saying are `a` and `2` similar, the answer is yes as `a` is a
+variable. Elixir accepts this match and initialises `a` with the value `2`.
+
+Line 4 we are asking the same question as in line 2, but `a` contains the value
+`2` this time. So Elixir complains, and he is right, `1` and `2` are not the
+same: *the pattern matching failed*.
+
+Pattern matching is a concept that is key to understand with Elixir, more on
+this topic later.
+
+Back to our small application. enter the following lines in `lib/fib.ex`:
+
+----
+def of(0) do
+  1
+end
+----
+
+We are defining the function `of/1` and we expect the passed argument to
+*match* the value `0`.
+
+
+Run the tests again, and watch them pass.
 
 ----
 1 test, 0 failures
 ----
 
+Next steps now, _fib(1) = 1_
+
+Write the following test:
+
+
+----
+test "fib(1) = 1" do
+  assert Fib.of(1) == 1
+end
+----
+
+Run the tests, Elixir gives you a hint:
+
 ----
 .
 
   1) test fib(1) = 1 (FibTest)
-     test/fib_test.exs:15
+     test/fib_test.exs:9
      ** (FunctionClauseError) no function clause matching in Fib.of/1
      stacktrace:
-       (fib) test/fib_test.exs:2: Fib.of(1)
-       test/fib_test.exs:16: (test)
+       (fib) lib/fib.ex:2: Fib.of(1)
+       test/fib_test.exs:10: (test)
 
 
 
-Finished in 0.06 seconds
+Finished in 0.03 seconds
 2 tests, 1 failure
 ----
 
+It cannot find a function `of/1` that has a clause that matches with the passed
+argument `1`. Let's fix that. For that you need to know that it is allowed in
+Elixir to have the same named function with different matching clauses.
+
 ----
 def of(1) do
-  1
+1
 end
 ----
+
+Run the tests again and watch them pass. Next step _fib(2) = 2_. Here is the test:
 
 ----
 test "fib(2) = 2" do
-  assert Fib.of(2) == 2
+	assert Fib.of(2) == 2
 end
 ----
 
-----
-..
+This test fails as there is no function `of/1` that takes an argument that
+matches with `2`. Let's fix that and this time generalise the implementation
 
+----
   1) test fib(2) = 2 (FibTest)
      test/fib_test.exs:13
      ** (FunctionClauseError) no function clause matching in Fib.of/1
      stacktrace:
        (fib) lib/fib.ex:2: Fib.of(2)
        test/fib_test.exs:14: (test)
+
+..
+
+Finished in 0.04 seconds
+3 tests, 1 failure
 ----
+
+The fix is done by adding the following function:
 
 ----
 def of(x) do
@@ -223,12 +349,28 @@ def of(x) do
 end
 ----
 
-----
-...
+Let's make a pause and look at pattern matching again, when we write
+`Fib.of(2)`. The function that matches is the one called `of(x)`. This function
+calls `of(x-1)` and `of(x-2)`. In our case: `of(1)` and `of(0)` that match
+their respective functions.
 
-Finished in 0.03 seconds
-3 tests, 0 failures
+*Note*: The order your write the functions in Elixir is important as pattern
+matching will execute the first function that matches. For example, take the
+function `of(x)` and put it in the first position. Execute the tests and...
+
 ----
+warning: this clause cannot match because a previous clause at line 2 always matches
+  lib/fib.ex:5
+
+warning: this clause cannot match because a previous clause at line 2 always matches
+  lib/fib.ex:9
+----
+
+...you fell in an infinite loop. The only way to get out of this is to press
+'<ctrl>+c' twice.
+
+We know that we are done with this implementation, but in TDD (Test Driven
+Development), if we are not sure, these is always another test to be written:
 
 ----
 test "fib(11) = 144" do
@@ -236,11 +378,6 @@ test "fib(11) = 144" do
 end
 ----
 
-----
-....
-
-Finished in 0.04 seconds
-4 tests, 0 failures
-----
+Run the tests and see them pass. Yes! We're done.
 
 // vim: set syntax=asciidoc tw=79:

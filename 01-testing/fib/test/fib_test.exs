@@ -10,9 +10,9 @@ defmodule FibTest do
     assert Fib.of(1) == 1
   end
 
-  test "fib(2) = 2" do
-    assert Fib.of(2) == 2
-  end
+	test "fib(2) = 2" do
+		assert Fib.of(2) == 2
+	end
 
   test "fib(11) = 144" do
     assert Fib.of(11) == 144
