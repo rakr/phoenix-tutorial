@@ -165,6 +165,7 @@ We are going to write the _code we'd like to have_, and start with the first
 test case: _fib(0) = 1_. Open `fib_test.exs`, and replace the first test with:
 
 [source, elixir]
+.test/fib_test.exs
 ----
 defmodule FibTest do
   use ExUnit.Case
@@ -200,6 +201,7 @@ be found. Create a file named `lib/fib.ex` and enter the following code to
 create the module `Fib`.
 
 [source, elixir]
+.lib/fib.ex
 ----
 defmodule Fib do
 end
@@ -210,6 +212,7 @@ the function `Fib.of/1`. The `/1` means *arity 1*, said otherwise a function
 that accepts one argument. In other programming language you would probably
 create a function or a method this way:
 
+.lib/fib.ex
 ----
 def of(x) do
 end
@@ -261,6 +264,8 @@ this topic later.
 
 Back to our small application. enter the following lines in `lib/fib.ex`:
 
+[source, elixir]
+.lib/fib.ex
 ----
 def of(0) do
   1
@@ -282,6 +287,8 @@ Next steps now, _fib(1) = 1_
 Write the following test:
 
 
+[source, elixir]
+.test/fib_test.exs
 ----
 test "fib(1) = 1" do
   assert Fib.of(1) == 1
@@ -310,17 +317,21 @@ It cannot find a function `of/1` that has a clause that matches with the passed
 argument `1`. Let's fix that. For that you need to know that it is allowed in
 Elixir to have the same named function with different matching clauses.
 
+[source, elixir]
+.lib/fib.ex
 ----
 def of(1) do
-1
+  1
 end
 ----
 
 Run the tests again and watch them pass. Next step _fib(2) = 2_. Here is the test:
 
+[source, elixir]
+.test/fib_test.exs
 ----
 test "fib(2) = 2" do
-	assert Fib.of(2) == 2
+  assert Fib.of(2) == 2
 end
 ----
 
@@ -343,6 +354,8 @@ Finished in 0.04 seconds
 
 The fix is done by adding the following function:
 
+[source, elixir]
+.lib/fib.ex
 ----
 def of(x) do
   of(x-1) + of(x-2)
@@ -372,6 +385,8 @@ warning: this clause cannot match because a previous clause at line 2 always mat
 We know that we are done with this implementation, but in TDD (Test Driven
 Development), if we are not sure, these is always another test to be written:
 
+[source, elixir]
+.test/fib_test.exs
 ----
 test "fib(11) = 144" do
   assert Fib.of(11) == 144
